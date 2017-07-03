@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Will take multiple video files in many possible formats and convert into h.264 mp4 while resizing (and maintaining porportions) and removing the audio track. 
-# Audio is removed to clear out noises in background
+# Audio is removed to clear out noises in background.  Useful for me, since I am deaf and use sign language and have no idea if there is distracting background noise while recording.
 
 # Useful for resizing large mp4 files created on phone or desktop without sarificing quality.
 # Makes it a snap to send long video clips to your friends (especially while they are mobile) without consuming too much bandwidth.
