@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Do not use this unless you know what you're doing!!!
-# This can open up security holes on your machine.
+# This can make your machine easily exploited.
 
 # This script makes a brew-installed binary run as root automatically, such as htop:
 # ./brewroot htop 
