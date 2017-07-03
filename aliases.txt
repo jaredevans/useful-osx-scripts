@@ -1,5 +1,23 @@
-# Show apps currently using network connections
+# Show apps currently using network connections.
 alias netprograms='sudo lsof -Pn -i4'
 
-# Sort programs by their CPU usage
+# Sort programs by their CPU usage.
 alias cpuprograms='ps axo %cpu,comm | sort | grep -v "CPU COM" | grep -v "0.0 " | grep -v "WindowServer"'
+
+# Another method to sort program by their CPU usage, the top 10:
+alias cpuhogs='ps wwaxr -o pid,stat,%cpu,time,command | head -10'
+
+# grep for a search keyword (case-insensitive) and show 5 lines before and after the keyword.
+alias beforeafter='egrep -C 5 -i -e '
+
+# List the name servers in use
+alias shownameservers='scutil --dns | grep "nameserver\[[0-9]*\]"'
+
+# Terse list of IPv4 routes in use.
+alias showroutes='netstat -rn | grep -v :: | grep -v lo0 | grep -v 224\.0 | grep -v 255\.255\.255\.255 | grep -v 169\.254'
+
+# Display human-readable listing of files/directories and sort by smallest to largest.
+alias dsize='du -d 1 -h | perl -e'"'"'%h=map{/.\s/;99**(ord$&&7)-$`,$_}`du -h`;die@h{reverse sort%h}'"'"
+
+# Display this machine's public IP address.
+alias pubip="dig +short myip.opendns.com @resolver1.opendns.com"
