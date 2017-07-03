@@ -7,6 +7,9 @@ alias cpuprograms='ps axo %cpu,comm | sort | grep -v "CPU COM" | grep -v "0.0 " 
 # Another method to sort program by their CPU usage, the top 10:
 alias cpuhogs='ps wwaxr -o pid,stat,%cpu,time,command | head -10'
 
+# Command line to put machine to sleep.
+alias sleepnow="pmset sleepnow"
+
 ########################################
 #########  Filesystem related  #########
 
@@ -15,6 +18,30 @@ alias beforeafter='egrep -C 5 -i -e '
 
 # Display human-readable listing of files/directories and sort by smallest to largest.
 alias dsize='du -d 1 -h | perl -e'"'"'%h=map{/.\s/;99**(ord$&&7)-$`,$_}`du -h`;die@h{reverse sort%h}'"'"
+
+# Display in ABC order, this directory and all sub-directories with their sizes 
+alias dirsize='du -h -d 1 .'
+
+# Display human readable output of available diskspace
+alias disksize='df -kh'
+
+# Display list of files from smallest to largest
+alias lsize='ls -alSr'
+
+# Display list of files from oldest to newest
+alias ldate='ls -ltr'
+
+# Display list of directories only
+alias lsd='ls -lF | grep "^d"'
+
+# Display count of files in current directory
+alias llc='echo Total number of files: `ll | wc -l` in `pwd`'
+
+# Remove unnecessary files
+alias cleanup="find . -name '*.DS_Store' -type f -ls -delete && find . -name 'Thumbs.db' -type f -ls -delete"
+
+# Update locate database so can find files on system using 'locate'
+alias updatelocate='sudo /usr/libexec/locate.updatedb'
 
 #####################################
 #########  Network related  #########
@@ -47,3 +74,6 @@ alias ipinfo1='ipconfig getpacket en1'
 
 # Display programs that are current listening
 alias openports='sudo lsof -i | grep LISTEN'
+
+# Check BGP routes
+alias checkbgp='echo " " ; echo "sho ip bgp 8.39.223.0/24" ; echo "sho ip bgp regexp 394756$" ; echo " " ; telnet route-views.routeviews.org'
