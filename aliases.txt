@@ -77,3 +77,12 @@ alias openports='sudo lsof -i | grep LISTEN'
 
 # Check BGP routes
 alias checkbgp='echo " " ; echo "sho ip bgp 8.39.223.0/24" ; echo "sho ip bgp regexp 394756$" ; echo " " ; telnet route-views.routeviews.org'
+
+
+#####################################
+#########  Git related  #########
+
+alias gs='git status'
+alias ga='git add .'
+alias gc='git commit -m' # requires you to type a commit message with double quotes "blah blah"
+alias gp='git push'
