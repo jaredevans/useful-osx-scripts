@@ -20,4 +20,4 @@ alias showroutes='netstat -rn | grep -v :: | grep -v lo0 | grep -v 224\.0 | grep
 alias dsize='du -d 1 -h | perl -e'"'"'%h=map{/.\s/;99**(ord$&&7)-$`,$_}`du -h`;die@h{reverse sort%h}'"'"
 
 # Display this machine's public IP address.
-alias pubip="dig +short myip.opendns.com @resolver1.opendns.com"
+alias publicip="dig +short myip.opendns.com @resolver1.opendns.com"
