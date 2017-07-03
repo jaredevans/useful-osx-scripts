@@ -12,6 +12,9 @@ do
 done 
 echo " "
 
+echo "Showing apps that have been signed."
+echo " " 
+
 egrep -i "(Executable|Identifier=|Authority=Developer ID App|PID)" codesign.log | grep -v Platform | grep -v Team | grep -B3 Authority=
 
 echo " "
