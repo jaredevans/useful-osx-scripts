@@ -1,5 +1,5 @@
-# Show apps currently using network connections.
-alias netprograms='sudo lsof -Pn -i4'
+#################################
+#########  CPU related  #########  
 
 # Sort programs by their CPU usage.
 alias cpuprograms='ps axo %cpu,comm | sort | grep -v "CPU COM" | grep -v "0.0 " | grep -v "WindowServer"'
@@ -7,8 +7,20 @@ alias cpuprograms='ps axo %cpu,comm | sort | grep -v "CPU COM" | grep -v "0.0 " 
 # Another method to sort program by their CPU usage, the top 10:
 alias cpuhogs='ps wwaxr -o pid,stat,%cpu,time,command | head -10'
 
+########################################
+#########  Filesystem related  #########
+
 # grep for a search keyword (case-insensitive) and show 5 lines before and after the keyword.
 alias beforeafter='egrep -C 5 -i -e '
+
+# Display human-readable listing of files/directories and sort by smallest to largest.
+alias dsize='du -d 1 -h | perl -e'"'"'%h=map{/.\s/;99**(ord$&&7)-$`,$_}`du -h`;die@h{reverse sort%h}'"'"
+
+#####################################
+#########  Network related  #########
+
+# Show apps currently using network connections.
+alias netprograms='sudo lsof -Pn -i4'
 
 # List the name servers in use
 alias shownameservers='scutil --dns | grep "nameserver\[[0-9]*\]"'
@@ -16,8 +28,22 @@ alias shownameservers='scutil --dns | grep "nameserver\[[0-9]*\]"'
 # Terse list of IPv4 routes in use.
 alias showroutes='netstat -rn | grep -v :: | grep -v lo0 | grep -v 224\.0 | grep -v 255\.255\.255\.255 | grep -v 169\.254'
 
-# Display human-readable listing of files/directories and sort by smallest to largest.
-alias dsize='du -d 1 -h | perl -e'"'"'%h=map{/.\s/;99**(ord$&&7)-$`,$_}`du -h`;die@h{reverse sort%h}'"'"
-
 # Display this machine's public IP address.
 alias publicip="dig +short myip.opendns.com @resolver1.opendns.com"
+
+# Display this machine's private IP addresses.
+alias privateip="ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p'"
+
+# Clear out DNS cache
+alias flushdns='dscacheutil -flushcache'
+
+# Display only open TCP or UDP sockets
+alias lsocku='sudo /usr/sbin/lsof -nP | grep UDP' 
+alias lsockt='sudo /usr/sbin/lsof -nP | grep TCP'
+
+# Get detailed info for interface en0 or en1
+alias ipinfo0='ipconfig getpacket en0'
+alias ipinfo1='ipconfig getpacket en1'
+
+# Display programs that are current listening
+alias openports='sudo lsof -i | grep LISTEN'
