@@ -53,6 +53,21 @@ function findtext() { find . -exec egrep $* \{\} /dev/null \; 2>/dev/null ; }
 # Recursively finding a directory with names matching keyword
 function finddir () { find . -type d -iname '*'$*'*' -ls ; }
 
+# Display tree view starting with current directory
+function tree(){
+	pwd
+	ls -R | grep ":$" |   \
+	sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
+}
+
+# Double the playback speed of MP4
+function doublespeed () { ffmpeg -i $* -r 100 -vf 'setpts=(1/2)*PTS' -an double.mp4 ; }
+
+# Pre-calculates the gzip compression of a file
+function gzipsize(){
+	echo $((`gzip -c $1 | wc -c`/1024))"KB"
+}
+
 #####################################
 #########  Network related  #########
 
