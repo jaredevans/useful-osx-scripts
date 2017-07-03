@@ -1,4 +1,7 @@
 #!/bin/sh
+
+# Corresponding apps with the network connections they are listening on or actively using.
+
 IFS="
 "
 function show_all
