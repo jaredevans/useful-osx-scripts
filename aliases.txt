@@ -1,0 +1,5 @@
+# Show apps currently using network connections
+alias netprograms='sudo lsof -Pn -i4'
+
+# Sort programs by their CPU usage
+alias cpuprograms='ps axo %cpu,comm | sort | grep -v "CPU COM" | grep -v "0.0 " | grep -v "WindowServer"'
