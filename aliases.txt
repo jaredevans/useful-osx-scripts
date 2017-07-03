@@ -43,6 +43,16 @@ alias cleanup="find . -name '*.DS_Store' -type f -ls -delete && find . -name 'Th
 # Update locate database so can find files on system using 'locate'
 alias updatelocate='sudo /usr/libexec/locate.updatedb'
 
+
+# Recursively finding files with names containing keyword
+function findfile() { find . -type f -iname '*'$*'*' -ls | awk '{ $1=$2=$3=$4=$5=$6=$8=$9=$10=""; print $0 }' | sed -e 's/^ '*'//' -e 's/ '*'$//'  ;}
+
+# Recursively finding a text string inside files
+function findtext() { find . -exec egrep $* \{\} /dev/null \; 2>/dev/null ; }
+
+# Recursively finding a directory with names matching keyword
+function finddir () { find . -type d -iname '*'$*'*' -ls ; }
+
 #####################################
 #########  Network related  #########
 
