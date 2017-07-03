@@ -9,6 +9,9 @@
 # This script will recursively visit current directory and all sub-directories
 # and replace the first few characters in filenames with the new set of characters
 
+# Example: You can replace all 1.* files with the new name of 0001.*
+# just enter 1 then 0001
+
 SAVEIFS=$IFS
 export IFS=$'\n';
 CDIR=$(pwd)
@@ -22,7 +25,7 @@ if (pwd | grep -c '/Users/jared/files_to_rename'); then
    echo "Correct Directory, proceeding..."
    echo " "
 else
-   echo "Wrong Directory. Terminating now."
+   echo "Wrong Directory. Terminating now to prevent hosing of this machine."
    echo " "
    exit 0
 fi
