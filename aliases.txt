@@ -34,6 +34,9 @@ alias ldate='ls -ltr'
 # Display list of directories only
 alias lsd='ls -lF | grep "^d"'
 
+# Display list of hidden directories then hidden files in ABC order
+alias lhidden="ls -la | grep "^d" | egrep -e ' \.\w+$' && ls -la | grep -v "^d" |  egrep -e ' \.\w+$'"
+
 # Display count of files in current directory
 alias llc='echo Total number of files: `ll | wc -l` in `pwd`'
 
