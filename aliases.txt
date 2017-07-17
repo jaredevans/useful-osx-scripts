@@ -32,10 +32,13 @@ alias lsize='ls -alSr'
 alias ldate='ls -ltr'
 
 # Display list of directories only
-alias lsd='ls -lF | grep "^d"'
+alias ldir='ls -lF | grep "^d"'
+
+# Display list of directories then files in ABC order (do not show anything that's hidden)
+alias l="ls -la | grep "^d" | egrep -v -e ' \..*$' && echo ' ' && ls -la | grep -v "^d" | egrep -v -e ' \..*$' | egrep -v -e '^total\ '"
 
 # Display list of hidden directories then hidden files in ABC order
-alias lhidden="ls -la | grep "^d" | egrep -e ' \.\w+$' && ls -la | grep -v "^d" |  egrep -e ' \.\w+$'"
+alias lhidden="ls -la | grep "^d" | egrep -e ' \..*$' && echo ' '  && ls -la | grep -v "^d" |  egrep -e ' \..*$'"
 
 # Display count of files in current directory
 alias llc='echo Total number of files: `ll | wc -l` in `pwd`'
