@@ -35,7 +35,7 @@ alias ldate='ls -ltr'
 alias ldir='ls -lF | grep "^d"'
 
 # Display list of directories then files in ABC order (do not show anything that's hidden)
-alias l="ls -la | grep "^d" | egrep -v -e ' \..*$' ; echo ' ' ; ls -la | grep -v "^d" | egrep -v -e ' \..*$' | egrep -v -e '^total\ '"
+function l() { ls -laF $* | grep "^d" | egrep -v -e ' \..*$' ; echo ' ' ; ls -laF $* | grep -v "^d" | egrep -v -e ' \..*$' | egrep -v -e '^total\ '; }
 
 # Display list of hidden directories then hidden files in ABC order
 alias lhidden="ls -la | grep "^d" | egrep -e ' \..*$' && echo ' '  && ls -la | grep -v "^d" |  egrep -e ' \..*$'"
