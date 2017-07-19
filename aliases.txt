@@ -31,8 +31,9 @@ alias lsize='ls -alSr'
 # Display list of files from oldest to newest
 alias ldate='ls -ltr'
 
-# Display list of directories only
-alias ldir='ls -lF | grep "^d"'
+# Display list of directories, colorized , followed by files. Slightly different than function l() below.
+# The directory argument needs to end with '/' and will show full relative path
+function ldir() { ls -ald $**/ 2>/dev/null; echo ' ' ; ls -lh $* | grep -v '^d' | egrep -v -e '^total' ; }
 
 # Display list of directories then files in ABC order (do not show anything that's hidden)
 function l() { ls -laF $* | grep "^d" | egrep -v -e ' \..*$' ; echo ' ' ; ls -laF $* | grep -v "^d" | egrep -v -e ' \..*$' | egrep -v -e '^total\ '; }
