@@ -38,7 +38,7 @@ alias ldir='ls -lF | grep "^d"'
 function l() { ls -laF $* | grep "^d" | egrep -v -e ' \..*$' ; echo ' ' ; ls -laF $* | grep -v "^d" | egrep -v -e ' \..*$' | egrep -v -e '^total\ '; }
 
 # Display list of hidden directories then hidden files in ABC order
-alias lhidden="ls -la | grep "^d" | egrep -e ' \..*$' && echo ' '  && ls -la | grep -v "^d" |  egrep -e ' \..*$'"
+function lh() { ls -laF $* | grep "^d" | egrep -e ' \..*$' ; echo ' ' ; ls -laF $* | grep -v "^d" | egrep -e ' \..*$' | egrep -v -e '^total\ '; }
 
 # Display count of files in current directory
 alias llc='echo Total number of files: `ll | wc -l` in `pwd`'
