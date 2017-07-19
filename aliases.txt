@@ -57,6 +57,9 @@ function findfile() { find . -type f -iname '*'$*'*' -ls | awk '{ $1=$2=$3=$4=$5
 # Recursively finding a text string inside files
 function findtext() { find . -exec egrep $* \{\} /dev/null \; 2>/dev/null ; }
 
+# Recursively finding a text string inside files, while skipping over unnecessary directories or files
+function fastfindtext () { sudo grep -i --exclude-dir={dev,log,bin,games,libexec,src,tmp,lib,lib64,media,sbin,selinux,sys,proc,spool,mysql} --exclude=*.{o,c,h,sql,pcap,so,a} -rwl . -e $* | awk '{ print $1 }' | sort | uniq ; }
+
 # Recursively finding a directory with names matching keyword
 function finddir () { find . -type d -iname '*'$*'*' -ls ; }
 
