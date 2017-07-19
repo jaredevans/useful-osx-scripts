@@ -31,15 +31,15 @@ alias lsize='ls -alSr'
 # Display list of files from oldest to newest
 alias ldate='ls -ltr'
 
-# Display list of directories, colorized , followed by files. Slightly different than function l() below.
+# Display list of directories, colorized , followed by files. Slightly different than function l () below.
 # The directory argument needs to end with '/' and will show full relative path
-function ldir() { ls -ald $**/ 2>/dev/null; echo ' ' ; ls -lh $* | grep -v '^d' | egrep -v -e '^total' ; }
+function ldir () { ls -ald $**/ 2>/dev/null; echo ' ' ; ls -lh $* | grep -v '^d' | egrep -v -e '^total' ; }
 
 # Display list of directories then files in ABC order (do not show anything that's hidden)
-function l() { ls -laF $* | grep "^d" | egrep -v -e ' \..*$' ; echo ' ' ; ls -laF $* | grep -v "^d" | egrep -v -e ' \..*$' | egrep -v -e '^total\ '; }
+function l () { ls -laF $* | grep "^d" | egrep -v -e ' \..*$' ; echo ' ' ; ls -laF $* | grep -v "^d" | egrep -v -e ' \..*$' | egrep -v -e '^total\ '; }
 
 # Display list of hidden directories then hidden files in ABC order
-function lh() { ls -laF $* | grep "^d" | egrep -e ' \..*$' ; echo ' ' ; ls -laF $* | grep -v "^d" | egrep -e ' \..*$' | egrep -v -e '^total\ '; }
+function lh () { ls -laF $* | grep "^d" | egrep -e ' \..*$' ; echo ' ' ; ls -laF $* | grep -v "^d" | egrep -e ' \..*$' | egrep -v -e '^total\ '; }
 
 # Display count of files in current directory
 alias llc='echo Total number of files: `ll | wc -l` in `pwd`'
@@ -52,10 +52,10 @@ alias updatelocate='sudo /usr/libexec/locate.updatedb'
 
 
 # Recursively finding files with names containing keyword
-function findfile() { find . -type f -iname '*'$*'*' -ls | awk '{ $1=$2=$3=$4=$5=$6=$8=$9=$10=""; print $0 }' | sed -e 's/^ '*'//' -e 's/ '*'$//'  ;}
+function findfile () { find . -type f -iname '*'$*'*' -ls | awk '{ $1=$2=$3=$4=$5=$6=$8=$9=$10=""; print $0 }' | sed -e 's/^ '*'//' -e 's/ '*'$//'  ;}
 
 # Recursively finding a text string inside files
-function findtext() { find . -exec egrep $* \{\} /dev/null \; 2>/dev/null ; }
+function findtext () { find . -exec egrep $* \{\} /dev/null \; 2>/dev/null ; }
 
 # Recursively finding a text string inside files, while skipping over unnecessary directories or files
 function fastfindtext () { sudo grep -i --exclude-dir={dev,log,bin,games,libexec,src,tmp,lib,lib64,media,sbin,selinux,sys,proc,spool,mysql} --exclude=*.{o,c,h,sql,pcap,so,a} -rwl . -e $* | awk '{ print $1 }' | sort | uniq ; }
@@ -64,7 +64,7 @@ function fastfindtext () { sudo grep -i --exclude-dir={dev,log,bin,games,libexec
 function finddir () { find . -type d -iname '*'$*'*' -ls ; }
 
 # Display tree view starting with current directory
-function tree(){
+function tree (){
 	pwd
 	ls -R | grep ":$" |   \
 	sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
@@ -74,13 +74,13 @@ function tree(){
 function doublespeed () { ffmpeg -i $* -r 100 -vf 'setpts=(1/2)*PTS' -an double.mp4 ; }
 
 # Pre-calculates the gzip compression of a file
-function gzipsize(){
+function gzipsize (){
 	echo $((`gzip -c $1 | wc -c`/1024))"KB"
 }
 
 #   extract:  Extract most know archives with one command
 #   ---------------------------------------------------------
-    extract () {
+function extract () {
         if [ -f $1 ] ; then
           case $1 in
             *.tar.bz2)   tar xjf $1     ;;
