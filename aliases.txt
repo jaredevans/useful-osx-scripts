@@ -145,3 +145,9 @@ alias gs='git status'
 alias ga='git add .'
 alias gc='git commit -m' # requires you to type a commit message with double quotes "blah blah"
 alias gp='git push'
+
+##################################################################
+#########  Show quick list of all aliases and functions  #########
+echo '    Additional cmds:'
+( cat ~/.bash_profile | grep function | awk '{ print $2 }' |  grep -v bash_profile ; cat .bash_profile | grep alias | grep -v '\#alias' | cut -d'=' -f 1 | cut -d' ' -f2 ) | sort | tr '\n' ' '
+echo ' '
