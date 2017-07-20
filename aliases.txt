@@ -33,16 +33,16 @@ alias ldate='ls -ltr'
 
 # Display list of directories, colorized , followed by files. Slightly different than function l () below.
 # The directory argument needs to end with '/' and will show full relative path
-function ldir () { ls -Ald $**/ 2>/dev/null; echo ' ' ; ls -lh $* | grep -v '^d' | egrep -v -e '^total' ; }
+function ldir () { ls -Ald $**/ 2>/dev/null; echo ' ' ; ls -lhF $* | grep -v '^d' | egrep -v -e '^total' ; }
 
 # Display list of directories then files in ABC order (do not show anything that's hidden)
-function l () { ls -lh $* | grep "^d" ; echo ' ' ; ls -lahF $* | grep -v "^d" | egrep -v -e ' \..*$' | egrep -v -e '^total\ '; }
+function l () { ls -lh $* | grep "^d" ; echo ' ' ; ls -lhF $* | grep -v "^d" | egrep -v -e '^total\ '; }
 
 # Display list of directories then files in ABC order (and show anything that's hidden too)
-function ll () { ls -Alh $* | grep "^d" | egrep -e ' \..*$' ; ls -Alh $* | grep "^d" | egrep -v -e ' \..*$' ; echo ' ' ; ls -lAhF $* | grep -v "^d" | egrep -e ' \..*$' ; ls -lAhF $* | grep -v "^d" | egrep -v -e ' \..*$' | egrep -v -e '^total\ '; }
+function ll () { ls -Alh $* | grep "^d" | egrep -e ' \..*$' ; ls -lh $* | grep "^d" ; echo ' ' ; ls -lAhF $* | grep -v "^d" | egrep -e ' \..*$' ; ls -lhF $* | grep -v "^d" | egrep -v -e '^total\ '; }
 
 # Display list of hidden directories then hidden files in ABC order
-function lh () { ls -laF $* | grep "^d" | egrep -e ' \..*$' ; echo ' ' ; ls -laF $* | grep -v "^d" | egrep -e ' \..*$' | egrep -v -e '^total\ '; }
+function lh () { ls -lAh $* | grep "^d" | egrep -e ' \..*$' ; echo ' ' ; ls -lAhF $* | grep -v "^d" | egrep -e ' \..*$' | egrep -v -e '^total\ '; }
 
 # Display count of files in current directory
 alias llc='echo Total number of files: `ll | wc -l` in `pwd`'
