@@ -1,0 +1,271 @@
+# ---------- Interactive zsh (each tab) ----------
+
+##### History
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=10000
+SAVEHIST=10000
+setopt APPEND_HISTORY INC_APPEND_HISTORY EXTENDED_HISTORY
+setopt HIST_IGNORE_SPACE HIST_REDUCE_BLANKS HIST_SAVE_NO_DUPS HIST_FIND_NO_DUPS
+
+##### Cursor style (VT520)
+_fix_cursor() { print -n -- $'\e[0 q'; }
+typeset -ga precmd_functions
+if [[ -z "${precmd_functions[(r)_fix_cursor]}" ]]; then
+  precmd_functions+=(_fix_cursor)
+fi
+
+##### Colors / term
+export CLICOLOR=1
+export LSCOLORS=gxfxcxdxbxegedabagacad
+export TERM=xterm-256color
+
+
+##### Quality-of-life cmds
+alias h='history 1'
+alias cls="clear && printf '\e[3J'"
+alias ls='command ls -G'
+alias grep='grep --color=auto'
+alias beforeafter='egrep -C 5 -i -e '
+alias release_from_quarantine='xattr -dr com.apple.quarantine'
+
+##### Networking aliases
+alias pubip="curl -s -4 ifconfig.me"
+alias privip="ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p'"
+alias netcons='lsof -i'
+alias flushdns='dscacheutil -flushcache'
+alias lsock='sudo /usr/sbin/lsof -i -P'
+alias lsocku='sudo /usr/sbin/lsof -P | grep UDP'
+alias lsockt='sudo /usr/sbin/lsof -P | grep TCP'
+alias ipinfo0='ipconfig getpacket en0'
+alias ipinfo1='ipconfig getpacket en1'
+alias openports='sudo lsof -i | grep LISTEN'
+alias showdns='scutil --dns'
+alias showip='echo -n "IP: "; ifconfig | grep "inet " | grep -v 127 | awk "{print \$2}" | head -1; echo -n "router: "; netstat -rn | grep "^default" | awk "{print \$2}" | head -1'
+alias showroutes='netstat -rn | grep -v :: | grep -v lo0 | grep -v 224\.0 | grep -v 255\.255\.255\.255 | grep -v 169\.254'
+alias shownameservers='scutil --dns | grep "nameserver\[[0-9]*\]"'
+
+##### System / utilities
+alias cpu-hogs='ps wwaxr -o pid,stat,%cpu,time,command | head -10'
+alias ttop="top -R -F -s 10 -o rsize"
+my_ps () { ps "$@" -u "$USER" -o pid,%cpu,%mem,start,time,tty,command | grep -v '??' | grep -v  'bin/login' ; }
+
+alias remove-mac-junkfiles="find . -name '*.DS_Store' -type f -ls -delete && find . -name 'Thumbs.db' -type f -ls -delete"
+alias sleepnow="pmset sleepnow"
+alias restartdock="killall -KILL Dock"
+
+# Safer ssh-agent loading (quiet if keys missing)
+if command -v ssh-agent >/dev/null 2>&1; then
+  [[ -z "$SSH_AUTH_SOCK" ]] && eval "$(ssh-agent -s)" >/dev/null
+  for k in "$HOME/.ssh/github_rsa" "$HOME/.ssh/id_blah"; do
+    [[ -f "$k" ]] && ssh-add "$k" >/dev/null 2>&1
+  done
+fi
+
+# zsh-native SSH completion already reads ~/.ssh/config; custom completer not needed.
+
+# LESS colors for man pages
+export LESS_TERMCAP_mb=$'\E[01;31m'
+export LESS_TERMCAP_md=$'\E[01;31m'
+export LESS_TERMCAP_me=$'\E[0m'
+export LESS_TERMCAP_se=$'\E[0m'
+export LESS_TERMCAP_so=$'\E[01;44;33m'
+export LESS_TERMCAP_ue=$'\E[0m'
+export LESS_TERMCAP_us=$'\E[01;32m'
+
+sshKeyGen () {
+  echo "Key name (no spaces)? "; read -r name
+  echo "Email? "; read -r email
+  ssh-keygen -t rsa -f "$HOME/.ssh/id_rsa_$name" -C "$email"
+  ssh-add "$HOME/.ssh/id_rsa_$name"
+  pbcopy < "$HOME/.ssh/id_rsa_$name.pub"
+  echo "SSH public key copied to clipboard."
+}
+
+tree () {
+  pwd
+  ls -R | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
+}
+
+alias updatelocate='sudo /usr/libexec/locate.updatedb'
+alias disksize='df -kh'
+alias dirsize='du -h -d 1 . 2>/dev/null | sort -hr | head -n 10'
+alias free='top -l 1 | head -7 | tail -1'
+
+# ls helpers
+alias lsd='ls -l | grep "^d"'
+alias lsize='ls -alSr'
+alias ldate='ls -ltr'
+alias llc='echo Total number of files:  $(ls -al | wc -l) in $(pwd)'
+
+l ()    { ls -Ald "$@"*/ 2>/dev/null; echo ' '; ls -lhF "$@" | grep -v '^d' | egrep -v -e '^total'; }
+ldir () { ls -lh "$@" | grep "^d"; echo ' ';  ls -lhF "$@" | grep -v "^d" | egrep -v -e '^total'; }
+ll ()   { ls -Alh "$@" | grep "^d" | egrep -e ' \..*$' ; ls -lh "$@" | grep "^d" ; echo ' ' ; ls -lAhF "$@" | grep -v "^d" | egrep -e ' \..*$' ; ls -lhF "$@" | grep -v "^d" | egrep -v -e '^total\ '; }
+lh ()   { ls -lAh "$@" | grep "^d" | egrep -e ' \..*$' ; echo ' ' ; ls -lAhF "$@" | grep -v "^d" | egrep -e ' \..*$' | egrep -v -e '^total\ '; }
+
+# PDF helpers (guarded)
+command -v sejda-console >/dev/null 2>&1 && {
+  alias rotatepdf="mkdir -p ./rotated ; sejda-console rotate --pageRotation all:90 -o ./rotated --files *.PDF"
+  alias mergepdf="sejda-console merge -o ./merged.pdf --files *.pdf"
+}
+
+alias vlc='open /Applications/VLC.app'
+
+alias ..="cd .."
+alias ...="cd ../.."
+alias edithosts='sudo vi /etc/hosts'
+
+# Git
+alias gs='git status'
+alias ga='git add .'
+alias gc='git commit -m'   # note: requires message
+alias gp='git push'
+
+# Brew/tools
+brewfind () {  find /opt/homebrew -iname "*$@*" | grep 'bin' | grep -e "$@$" ; }
+alias bi='clear ; brew info '
+
+alias showconns="$HOME/bin/net/showconns.sh"
+
+alias fastscan='nmap -n -F --open '   # requires nmap
+
+hdfree () { echo "Space left: $(df -h | awk '/\/$/{print $4}')"; }
+
+alias ccat="clear ; cat "
+
+# vff: fuzzy-ish file chooser (zsh)
+vff() {
+  local pattern="$1"
+  if [[ -z "$pattern" ]]; then
+    echo "Usage: vff <pattern>"
+    return 1
+  fi
+
+  local -a EXCLUDES=(bin include lib __pycache__ assets share node_modules dist .git .venv build out target)
+  local -a prune_expr
+  local dir
+  for dir in "${EXCLUDES[@]}"; do
+    prune_expr+=(-name "$dir" -o)
+  done
+  # drop trailing -o
+  (( ${#prune_expr[@]} )) && prune_expr=("${prune_expr[@]:0:${#prune_expr[@]}-1}")
+
+  # Collect files (case-insensitive, substring match)
+  local -a files
+  # shellcheck disable=SC2207
+  files=("${(@f)$(find . \( -type d \( ${prune_expr[@]} \) -prune \) -o -type f -iname "*${pattern}*" -print | sort)}")
+
+  if (( ${#files[@]} == 0 )); then
+    echo "No files found matching '*$pattern*'"
+    return 1
+  fi
+
+  echo "Ignoring: ${EXCLUDES[*]}"
+
+  # If exactly one match, open it directly
+  if (( ${#files[@]} == 1 )); then
+    "${EDITOR:-vi}" -- "${files[1]}"
+    return
+  fi
+
+  # Interactive menu
+  local PS3=$'Select file (number), or q to quit: '
+  select file in "${files[@]}"; do
+    case $REPLY in
+      q|Q) return 1 ;;
+      '' ) echo "Enter a number or 'q' to quit." ;;
+      * )
+        if [[ -n "$file" ]]; then
+          "${EDITOR:-vi}" -- "$file"
+          break
+        else
+          echo "Invalid choice: $REPLY"
+        fi
+        ;;
+    esac
+  done
+}
+
+
+# simple "find & vi"
+vii() {
+  if (( $# != 1 )); then echo "Usage: vii <filename>"; return 1; fi
+  local file_path; file_path=$(find . -type f -name "$1" -print -quit)
+  [[ -n "$file_path" ]] && { echo "Opening: $file_path"; vi "$file_path"; } || echo "Not found: $1"
+}
+
+##### Find/search helpers (zsh-safe)
+f()  { /usr/bin/find . -name "*$**" ; }
+fs() { /usr/bin/find . -iname "$**" ; }
+fe() { /usr/bin/find . -iname "*$**" ; }
+
+findfile () {
+  sudo find . \( -type d \( -name 'dev' -o -name 'games' -o -name 'libexec' -o -name 'tmp' -o -name 'lib' -o -name 'lib64' -o -name 'sbin' -o -name 'selinux' -o -name 'sys' -o -name 'proc' -o -name 'spool' -o -name 'mysql' -o -name 'include' -o -name '.cache' -o -name '.npm' -o -name 'node_modules' -o -name 'Applications' -o -name 'Applications (Parallels)' -o -name 'Calibre Library' -o -name 'Library' -o -name 'Movies' -o -name 'Music' -o -name 'Parallels' -o -name 'Pictures' -o -name 'Virtual Machines.localized' -o -name 'iCloud Drive (Archive)' -o -name '.venv' -o -name '.lmstudio' -o -name '.cache' \) -prune \) -o -type f -iname "*$**" -print 2>/dev/null
+}
+findtext () { find . -exec egrep "$*" {} /dev/null \; 2>/dev/null ; }
+finddir ()  { find . \( -name 'Application Support' -o -name 'Library' -o -name 'Pictures' -o -name 'Movies' -o -name 'Parallels' -o -name '.tldrc' -o -name 'Virtual Machines.localized' -o -name '.venv' -o -name '.lmstudio' -o -name '.cache'  \) -prune -o -type d -iname "*$**" -ls ; }
+
+fastfindtext () {
+  local pattern="$*"
+  [[ -z "$pattern" ]] && { echo "Usage: fastfindtext <pattern>"; return 1; }
+  sudo find . -maxdepth 4 \
+    \( -type d \( -name dev -o -name 'Library' -o -name '.Trash' -o -name log -o -name bin -o -name games -o -name libexec -o -name src -o -name tmp -o -name lib -o -name lib64 -o -name media -o -name sbin -o -name selinux -o -name sys -o -name proc -o -name spool -o -name mysql -o -name include -o -name dist -o -name .cache -o -name .npm -o -name node_modules -o -name '.venv' -o -name '.lmstudio' \) -prune \) -o \
+    \( -type f ! -name '*__*' ! \( -name '*.o' -o -name '*.c' -o -name '*.h' -o -name '*.sql' -o -name '*.pcap' -o -name '*.so' -o -name '*.a' -o -name '*.tar' -o -name '*.pdf' -o -name '*.mp4' -o -name '*.epub' -o -name '*.docx' -o -name '*.cbr' -o -name '*.xls' -o -name '*.png'  -o -name '*.jpg' -o -name '*.JPG'  -o -name '*.dmg' \) -print0 \) \
+    | xargs -0 grep -i -w -l -- "$pattern" | sort -u
+}
+
+##### Node auto-use (.nvmrc) and Python auto-venv
+autoload -U add-zsh-hook
+load-nvmrc() { [[ -r .nvmrc ]] && command -v nvm >/dev/null 2>&1 && nvm use >/dev/null; }
+add-zsh-hook chpwd load-nvmrc
+load-nvmrc
+
+auto_venv() { [[ -r ".venv/bin/activate" ]] && source ".venv/bin/activate"; }
+add-zsh-hook chpwd auto_venv
+auto_venv
+
+##### Nginx helpers
+alias nginx_start="brew services start nginx"
+alias nginx_stop="brew services stop nginx"
+alias nginx_restart="brew services restart nginx"
+
+##### Open-WebUI
+alias open-webui_start='source "/Users/jared/python_projects/open-webui/.venv/bin/activate" ; open-webui serve --host 127.0.0.1 --port 8765'
+
+##### Misc dev helpers
+alias verifyprograms='$HOME/bin/verify_programs.sh'
+alias netprograms='sudo lsof -Pn -i4 | awk '"'"'{print $1 "   " $3 "   " $8 "   " $9}'"'"' | column -t'
+alias netprogramslistening='sudo lsof -iTCP -sTCP:LISTEN -Pn | sort'
+alias cpuprograms='ps axo %cpu,comm | sort | grep -v "CPU COM" | grep -v "0.0 " | grep -v "WindowServer"'
+alias plaincopy='pbpaste -Prefer txt | pbcopy'
+
+alias downloadyt='noglob yt-dlp -f mp4 -o "%(title)s.%(ext)s"'
+alias renew='source ~/.zshrc'
+alias sanitizefiles='$HOME/bin/files/filename_sanitize.sh'
+alias lowersanitizefiles='$HOME/bin/files/filename_sanitize.sh --lower'
+
+##### Handy banners (quiet by default)
+# Requires 'boxes' if you want to re-enable.
+printf "Additional cmds:" | boxes -d ada-box -a c -p a0l5r5
+printf "\n"
+
+( cat ~/.zshrc | grep alias | grep -v '\#alias' | cut -d'=' -f 1 | cut -d' ' -f2 ) | sort | tr '\n' ' '
+echo ' '
+echo ' '
+echo 'Useful brew cmds: byobu tldr ebook-convert btop gitshell jnettop iperf iperf3 ncdu resolveip testssl'
+echo ' '
+
+[[ -x "$HOME/bin/net/wifi_signal.sh" ]] && "$HOME/bin/net/wifi_signal.sh" 
+
+##### Optional IP/space echo on startup (quieted unless you want it)
+ if curl -s --max-time 1 https://api.ipify.org >/tmp/pubip 2>/dev/null; then
+   echo "Connected to public Internet: $(cat /tmp/pubip)"
+ else
+   echo "Not connected to public Internet."
+ fi
+
+echo "Private: "
+$HOME/bin/net/net-show-inet4.sh
+echo " "
+
+hdfree
+
