@@ -1,21 +1,65 @@
-#!/bin/sh
+#!/usr/bin/env bash
+# check‑signatures.sh — audit running processes’ code‑signatures
+#   • skips Apple‑signed binaries (Identifier starts with com.apple)
+#   • writes a trimmed block for each remaining PID to codesign.log
+#   • shows one readable row‑style block per PID on stdout
+# -----------------------------------------------------------------
 
-echo "Checking the signature of every program running on the system...."
-echo " "
-rm -f codesign.log
+set -euo pipefail
+LOG="codesign.log"
+: >"$LOG"                         # overwrite on each run
 
-for i in `ps axo pid` 
-do 
-  echo "----- PID $i -----" >> codesign.log
-  codesign -dvv $i 2>> codesign.log 
-  printf . 
-done 
-echo " "
+echo "Gathering code‑signature information for all running processes…"
+printf "Progress: "
 
-echo "Showing apps that have been signed."
-echo " " 
+# Keep only these lines from codesign output
+KEEP_RE='^(Executable=|Identifier=|Format=|Signature size|Authority=|Timestamp=|Runtime Version=)'
 
-egrep -i "(Executable|Identifier=|Authority=Developer ID App|PID)" codesign.log | grep -v Platform | grep -v Team | grep -B3 Authority=
+# Enumerate PID and executable path (no headers, no args)
+/bin/ps -axo pid=,comm= |
+while read -r pid exe; do
+  [[ $pid -eq 0 || $pid -eq $$ ]] && { printf '.'; continue; }  # skip kernel & self
+  [[ ! -e $exe ]] &&                { printf '.'; continue; }
 
-echo " "
-echo "Check the file codesign.log for full log."
+  # Capture codesign output (or fallback if unsigned)
+  cs_out=$(/usr/bin/codesign -d --verbose=2 "$exe" 2>&1) || \
+      cs_out="codesign lookup failed (likely unsigned)"
+
+  # Extract identifier
+  ident=$(printf '%s\n' "$cs_out" | awk -F= '/^Identifier=/ {print $2; exit}')
+
+  # Omit Apple‑signed binaries entirely
+  [[ $ident == com.apple.* ]] && { printf '.'; continue; }
+
+  # Write header plus selected lines to log
+  {
+    echo "----- PID $pid ($exe) -----"
+    printf '%s\n' "$cs_out" | grep -E "$KEEP_RE"
+  } >>"$LOG"
+
+  printf '.'
+done
+echo    # newline after dots
+
+###############################################################################
+# STDOUT summary — block of rows per PID (already filtered log)
+###############################################################################
+awk '
+  /^----- PID/ {
+      if (NR>1) print "";                    # blank line between PID blocks
+      pid=$3
+      printf "PID:            %s\n", pid
+      next
+  }
+  /^Executable=/      { sub(/^Executable=/,"");       printf "Executable:     %s\n", $0; next }
+  /^Identifier=/      { sub(/^Identifier=/,"");       printf "Identifier:     %s\n", $0; next }
+  /^Format=/          { sub(/^Format=/,"");           printf "Format:         %s\n", $0; next }
+  /^Signature size=/  { sub(/^Signature size=/,"");   printf "Signature size: %s\n", $0; next }
+  /^Authority=/       { sub(/^Authority=/,"");        printf "Authority:      %s\n", $0; next }
+  /^Timestamp=/       { sub(/^Timestamp=/,"");        printf "Timestamp:      %s\n", $0; next }
+  /^Runtime Version=/ { sub(/^Runtime Version=/,"");  printf "Runtime ver.:   %s\n", $0; next }
+' "$LOG"
+
+echo
+echo "Full verbose output saved to: $LOG"
+

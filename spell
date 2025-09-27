@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+# spell: correct a word (aspell) and define it (WordNet wn)
+# Usage: spell <word>
+# Requires: aspell, wordnet (wn)
+
+set -Eeuo pipefail
+
+if [[ $# -lt 1 ]]; then
+  echo "Usage: spell <word>"
+  exit 1
+fi
+
+word="$1"
+lang="${ASPELL_LANG:-en_US}"   # e.g., ASPELL_LANG=en_GB spell colour
+
+require_cmd() { command -v "$1" >/dev/null 2>&1 || { echo "Missing '$1'. Install it (e.g., 'brew install $1')." >&2; exit 3; }; }
+require_cmd aspell
+require_cmd wn
+
+trim() { sed 's/^[[:space:]]*//;s/[[:space:]]*$//' ; }
+
+define_word() {
+  local w="$1"
+  echo "— Definition for: $w —"
+  local out
+  out="$(wn "$w" -over 2>/dev/null || true)"
+  if [[ -z "${out//[[:space:]]/}" ]]; then
+    echo "(No WordNet overview found for '$w'. Try a different word.)"
+    return 2
+  fi
+  printf '%s\n' "$out"
+}
+
+# ---- Ask aspell for suggestions ----
+raw="$(printf '%s\n' "$word" | aspell -a --lang="$lang" 2>/dev/null || true)"
+line2="$(sed -n '2p' <<<"$raw" || true)"
+
+# Cases:
+#   "*"  -> correct
+#   "&"  -> misspelled; suggestions after ": "
+#   "#"  -> misspelled; no suggestions
+if [[ "$line2" == \** ]]; then
+  echo "Word appears correct: $word"
+  define_word "$word"
+  exit $?
+fi
+
+# Build suggestions (if any)
+declare -a SUGS=()
+if [[ "$line2" == \&* ]]; then
+  suggestions="${line2#*: }"
+  # Split by comma, trim each
+  IFS=',' read -r -a arr <<<"$suggestions"
+  for s in "${arr[@]}"; do
+    s="$(printf '%s' "$s" | trim)"
+    [[ -n "$s" ]] && SUGS+=("$s")
+  done
+fi
+
+# If we have suggestions, present a menu
+if (( ${#SUGS[@]} > 0 )); then
+  # Cap to a reasonable list
+  MAX=${SPELL_MAX_SUGGESTIONS:-12}
+  if (( ${#SUGS[@]} > MAX )); then
+    SUGS=("${SUGS[@]:0:MAX}")
+  fi
+
+  echo "Did you mean (choose a number)?"
+  i=1
+  for s in "${SUGS[@]}"; do
+    printf " %2d) %s\n" "$i" "$s"
+    ((i++))
+  done
+  echo "  0) Keep original: $word"
+  echo "  q) Quit"
+
+  choice=""
+  # If not interactive (no TTY) or user asked for noninteractive, pick first suggestion
+  if [[ ! -t 0 || "${SPELL_NONINTERACTIVE:-0}" == "1" ]]; then
+    choice=1
+  else
+    read -r -p "Select [1-${#SUGS[@]}] (Enter=1, 0=original, q=quit): " choice
+  fi
+
+  case "$choice" in
+    "" ) picked="${SUGS[0]}" ;;
+    q|Q ) exit 0 ;;
+    0 )   picked="$word" ;;
+    * )
+      if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice>=1 && choice<=${#SUGS[@]} )); then
+        picked="${SUGS[choice-1]}"
+      else
+        echo "Invalid choice. Using original: $word"
+        picked="$word"
+      fi
+      ;;
+  esac
+
+  define_word "$picked"
+  exit $?
+else
+  # No suggestions from aspell ("#" case or empty). Offer to use original.
+  echo "No suggestions found for '$word'. Using original."
+  define_word "$word"
+  exit $?
+fi
